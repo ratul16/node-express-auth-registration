@@ -1,26 +1,85 @@
 const router = require('express').Router();
+// const User = require('../models/User');
 const userSchema = require('../models/User');
-const { } = require('../validate');
+const Bcrypt = require('bcryptjs');
+const { registerValidation, loginValidation } = require('../validate');
 
+
+// Registration Route
 router.post('/signup/', async (req, res) => {
+
+    // Data validation
+    const { error } = registerValidation(req.body);
+
+    if (error) return res.send({
+        statusCode: 400,
+        message: error.details[0].message
+    });
+
+    // Existing user check
+    const userExist = await userSchema.findOne({ email: req.body.email });
+    if (userExist) return res.send({
+        statusCode: 400,
+        message: "Email already exists !!"
+    });
+
+    // Password Hashing
+    const salt = Bcrypt.genSaltSync(10);
+    const passwordHash = Bcrypt.hashSync(req.body.password, salt);
+
+    // Create new User 
     const user = new userSchema({
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password
+        password: passwordHash
     });
     try {
         const storeUser = await user.save();
-        res.send(storeUser);
+        res.send({
+            statusCode: 201,
+            message: "New user registered successfully !!"
+        });
 
     } catch (err) {
-        res.status(400).send(err);
+        res.send({
+            statusCode: 400,
+            message: err
+        });
     }
 
 });
 
 
-router.post('/signin/', (req, res) => {
-    res.send("Sign In Routes");
+// Login Route
+router.post('/signin/', async (req, res) => {
+
+    // Data validation
+    const { error } = loginValidation(req.body);
+    if (error) return res.send({
+        statusCode: 400,
+        message: error.details[0].message
+    });
+
+    // Existing user check
+    const userExist = await userSchema.findOne({ email: req.body.email });
+    if (!userExist) return res.send({
+        statusCode: 400,
+        message: "Email or password is incorrect"
+    });
+
+    //Compare Password
+    const validPassword = Bcrypt.compareSync(req.body.password, userExist.password);
+    if (!validPassword) return res.send({
+        statusCode: 400,
+        message: "Email or password is incorrect"
+    });
+
+    res.send({
+        statusCode: 200,
+        message: "Logged In !!"
+    });
+
+
 });
 
 router.get('/getuser/', (req, res) => {
