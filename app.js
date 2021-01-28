@@ -4,7 +4,7 @@ const app = express();
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
-// Router Middleware
+// CORS Check
 app.use(cors());
 
 // Import Routes
@@ -22,8 +22,9 @@ mongoose.connect(process.env.MONGODB, { useNewUrlParser: true, useUnifiedTopolog
 
 
 //  Middlewares
-
 app.use(express.json());
+
+// Route Middlewares
 app.use('/api/', authRoute);
 
 
