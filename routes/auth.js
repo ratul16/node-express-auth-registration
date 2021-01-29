@@ -3,6 +3,7 @@ const userSchema = require('../models/User');
 const JWT = require('jsonwebtoken');
 const Bcrypt = require('bcryptjs');
 const { registerValidation, loginValidation } = require('../validate');
+const verify = require('./tokenVerify');
 
 
 // Registration Route
@@ -84,8 +85,16 @@ router.post('/signin/', async (req, res) => {
 
 });
 
-router.get('/getuser/', (req, res) => {
-    res.send('Sending all user info');
+router.get('/posts/', verify, (req, res) => {
+    res.json({
+        posts: {
+            "postId": 1,
+            "id": 2,
+            "name": "quo vero reiciendis velit similique earum",
+            "email": "Jayne_Kuhic@sydney.com",
+            "body": "est natus enim nihil est dolore omnis voluptatem numquam\net omnis occaecati quod ullam at\nvoluptatem error expedita pariatur\nnihil sint nostrum voluptatem reiciendis et"
+        }
+    });
 });
 
 module.exports = router;
